@@ -73,6 +73,62 @@ interface SearchState {
   error: string | null
 }
 
+// ── Decorative components ──────────────────────────────────────────────────
+
+// Horizontal film strip with sprocket holes
+function FilmStrip({ className = "" }: { className?: string }) {
+  return (
+    <div
+      aria-hidden
+      className={`h-[14px] w-full shrink-0 ${className}`}
+      style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='14'%3E%3Crect width='26' height='14' fill='%231A1612'/%3E%3Crect x='3' y='2' width='8' height='10' rx='1' fill='%230D0B08'/%3E%3Crect x='15' y='2' width='8' height='10' rx='1' fill='%230D0B08'/%3E%3C/svg%3E")`,
+        backgroundRepeat: "repeat-x",
+        backgroundSize: "26px 14px",
+      }}
+    />
+  )
+}
+
+// Marquee bulb row
+function MarqueeLights({ className = "" }: { className?: string }) {
+  return (
+    <div className={`flex gap-[5px] overflow-hidden ${className}`} aria-hidden>
+      {Array.from({ length: 120 }).map((_, i) => (
+        <div
+          key={i}
+          className="w-[4px] h-[4px] rounded-full shrink-0"
+          style={{
+            background:
+              i % 5 === 0 ? "#F0DFA0"
+              : i % 5 === 2 ? "#C9922A"
+              : "#2E2418",
+            boxShadow:
+              i % 5 === 0 ? "0 0 5px 2px rgba(240,223,160,0.18)"
+              : i % 5 === 2 ? "0 0 4px 1px rgba(201,146,42,0.12)"
+              : "none",
+            opacity: i % 5 === 0 ? 0.95 : i % 5 === 2 ? 0.65 : 0.2,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// Vertical film perforation strip (for card edges)
+function FilmPerfs({ count = 5 }: { count?: number }) {
+  return (
+    <div className="flex flex-col justify-evenly items-center py-3 gap-0" aria-hidden>
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="w-[9px] h-[7px] rounded-[1px] bg-[#0D0B08] border border-[#252018]"
+        />
+      ))}
+    </div>
+  )
+}
+
 // ── Recommendation renderer ────────────────────────────────────────────────
 const TMDB_IMG = "https://image.tmdb.org/t/p/w185"
 
@@ -110,32 +166,76 @@ function parseBlocks(text: string): RecBlock[] {
 
 function RecCard({ block }: { block: RecBlock }) {
   return (
-    <div className="flex gap-4 items-start animate-slide-in">
-      {block.posterPath ? (
-        <img
-          src={`${TMDB_IMG}${block.posterPath}`}
-          alt={block.title}
-          className="w-16 shrink-0 rounded-lg object-cover shadow-lg"
-          style={{ aspectRatio: "2/3" }}
-        />
-      ) : (
-        <div
-          className="w-16 shrink-0 rounded-lg bg-surface-elevated border border-surface-border"
-          style={{ aspectRatio: "2/3" }}
-        />
-      )}
-      <div className="flex-1 min-w-0 pt-0.5">
-        <p className="leading-snug">
-          <strong className="font-display text-[1.1rem] font-semibold text-accent">
-            {block.title}
-          </strong>
-          <span className="text-[#60606a] text-[12px] font-mono ml-2">{block.meta}</span>
-        </p>
-        {block.description && (
-          <p className="text-[13px] text-[#888890] mt-1.5 leading-relaxed">
-            {block.description}
-          </p>
+    <div className="flex animate-slide-in border-b border-[#2E2620] last:border-b-0">
+      {/* Left perforations */}
+      <div className="w-5 shrink-0 bg-[#161210] border-r border-[#2E2620]">
+        <FilmPerfs count={6} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 flex gap-4 p-4 bg-[#120F0C]">
+        {block.posterPath ? (
+          <div className="relative shrink-0 w-[52px]">
+            <img
+              src={`${TMDB_IMG}${block.posterPath}`}
+              alt={block.title}
+              className="w-full object-cover block"
+              style={{ aspectRatio: "2/3" }}
+            />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ boxShadow: "inset 0 0 0 2px #C8281E" }}
+            />
+          </div>
+        ) : (
+          <div
+            className="w-[52px] shrink-0 bg-[#1E1A16] border border-[#2E2620]"
+            style={{ aspectRatio: "2/3" }}
+          />
         )}
+
+        <div className="flex-1 min-w-0 pt-0.5">
+          <p className="font-display text-[1.45rem] leading-none tracking-wider text-[#F2ECD8] uppercase">
+            {block.title}
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-[#C9922A] mt-1.5">
+            {block.meta}
+          </p>
+          {block.description && (
+            <p className="font-sans text-[12px] text-[#6E6050] mt-2 leading-relaxed">
+              {block.description}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Right perforations */}
+      <div className="w-5 shrink-0 bg-[#161210] border-l border-[#2E2620]">
+        <FilmPerfs count={6} />
+      </div>
+    </div>
+  )
+}
+
+// ── Section label ──────────────────────────────────────────────────────────
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="font-mono text-[9px] uppercase tracking-[0.35em] text-[#4A3820] mb-1">
+      — {children} —
+    </p>
+  )
+}
+
+// ── Preference card wrapper ────────────────────────────────────────────────
+function PrefCard({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="border border-[#2E2620] bg-[#120F0C] overflow-hidden">
+      <FilmStrip />
+      <div className="p-4">
+        <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#4A3820] mb-3">
+          {label}
+        </p>
+        {children}
       </div>
     </div>
   )
@@ -169,7 +269,8 @@ export default function App() {
   const [selectedMoods, setSelectedMoods] = useState<Set<string>>(new Set())
   const [selectedStyles, setSelectedStyles] = useState<Set<string>>(new Set())
   const [description, setDescription] = useState("")
-  // ── Search state (replaces useChat/useCompletion)
+
+  // ── Search state
   const [searchState, setSearchState] = useState<SearchState>({
     status: "idle", foundCount: null, completion: "", error: null,
   })
@@ -268,7 +369,6 @@ export default function App() {
 
         buffer += decoder.decode(value, { stream: true })
 
-        // Detect [FOUND:N] marker
         if (foundCount === null) {
           const m = buffer.match(/\[FOUND:(\d+)\]\n/)
           if (m && m.index !== undefined) {
@@ -278,7 +378,6 @@ export default function App() {
           }
         }
 
-        // Extract display text (everything after the [FOUND:N] marker)
         if (textStart !== null) {
           const cleanText = buffer.slice(textStart)
           if (cleanText.trim()) {
@@ -311,422 +410,532 @@ export default function App() {
   const recBlocks = parseBlocks(completion)
   const isActive = ss === "searching" || ss === "found" || ss === "streaming"
 
+  // Shared pill classes
+  const pill =
+    "px-3 py-1.5 border font-mono text-[10px] uppercase tracking-[0.12em] cursor-pointer select-none transition-all duration-150 " +
+    "bg-[#120F0C] border-[#2E2620] text-[#5A4E3E] " +
+    "hover:border-[#4A3828] hover:text-[#9A8870] " +
+    "data-[pressed]:bg-[#C8281E] data-[pressed]:border-[#C8281E] data-[pressed]:text-[#F2ECD8]"
+
   return (
-    <div className="min-h-screen bg-surface text-[#e0e0ea] font-sans antialiased">
-      {/* Film grain overlay */}
+    <div className="min-h-screen bg-[#0D0B08] text-[#F2ECD8] font-sans antialiased">
+
+      {/* Deep ambient glows */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 opacity-[0.025] z-0"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          backgroundSize: "200px",
-        }}
+        className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] z-0"
+        style={{ background: "radial-gradient(ellipse, #C8281E07 0%, transparent 65%)" }}
       />
-      {/* Ambient glow */}
       <div
         aria-hidden
-        className="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[500px] h-[240px] opacity-[0.05] z-0"
-        style={{ background: "radial-gradient(ellipse, #e8b86d 0%, transparent 70%)" }}
+        className="pointer-events-none fixed bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[250px] z-0"
+        style={{ background: "radial-gradient(ellipse, #C9922A05 0%, transparent 65%)" }}
       />
 
-      <div className="relative z-10 max-w-2xl mx-auto px-4 pt-10 pb-20">
+      <div className="relative z-10 max-w-xl mx-auto pb-24">
 
-        {/* ── Header ── */}
-        <header className="flex items-center justify-between mb-10">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-lg bg-surface-card border border-surface-border">
-              <FilmSlateIcon size={17} weight="duotone" className="text-accent" />
-            </div>
-            <span className="text-[13px] font-semibold tracking-tight">
-              something<span className="text-accent">towatch</span>
-            </span>
-          </div>
+        {/* ═══════════════════════════════════════════
+            MARQUEE HEADER
+        ═══════════════════════════════════════════ */}
+        <header className="pt-6 mb-10">
+          <MarqueeLights className="px-0 mb-2" />
+          <div className="h-[3px] bg-[#C8281E]" />
 
-          <div className="flex items-center gap-3">
-            {/* Step pills */}
-            {step !== "setup" && (
-              <div className="flex items-center gap-1.5">
-                {(["type", "preferences", "results"] as Step[]).map((s) => (
-                  <div
-                    key={s}
-                    className={`rounded-full transition-all duration-300 ${
-                      s === step
-                        ? "w-5 h-1.5 bg-accent"
-                        : ["type", "preferences", "results"].indexOf(s) <
-                          ["type", "preferences", "results"].indexOf(step)
-                        ? "w-1.5 h-1.5 bg-accent opacity-60"
-                        : "w-1.5 h-1.5 bg-surface-elevated border border-surface-border"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-            {step !== "setup" && (
-              <button
-                onClick={() => setStep("setup")}
-                className="p-1.5 rounded-lg text-[#454550] hover:text-[#a0a0a8] hover:bg-surface-elevated transition-colors"
-                title="Settings"
+          <div className="px-5 py-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="font-mono text-[8px] uppercase tracking-[0.35em] text-[#3A2C1A] mb-2">
+                Est. 2025 &nbsp;·&nbsp; AI Cinema
+              </p>
+              <h1
+                className="font-display leading-none text-[#F2ECD8] animate-flicker"
+                style={{
+                  fontSize: "clamp(2.6rem, 8vw, 3.4rem)",
+                  textShadow: "0 0 60px rgba(200,40,30,0.12), 0 2px 4px rgba(0,0,0,0.6)",
+                  letterSpacing: "0.04em",
+                }}
               >
-                <GearSixIcon size={15} />
-              </button>
-            )}
-          </div>
-        </header>
-
-        {/* ════════════════════════════════════════════════════
-            SETUP
-        ════════════════════════════════════════════════════ */}
-        {step === "setup" && (
-          <div className="animate-slide-up">
-            <div className="mb-7">
-              <h1 className="font-display text-[2.6rem] font-semibold text-[#f0f0f2] leading-[1.15] mb-2">
-                Where are you<br />
-                <em className="text-accent not-italic">watching tonight?</em>
+                Something<br />to Watch
               </h1>
-              <p className="text-[14px] text-[#585860]">
-                Set your region and services once. We'll remember.
+              <p className="font-serif italic text-[13px] text-[#7A6040] mt-2 leading-snug">
+                presented for your viewing pleasure
               </p>
             </div>
 
-            <div className="rounded-2xl border border-surface-border bg-surface-card p-5 space-y-5">
-              {/* Country */}
-              <div>
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <GlobeIcon size={12} className="text-[#454550]" />
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#454550]">
-                    Region
-                  </span>
-                </div>
-                <div className="relative inline-block">
-                  <select
-                    value={country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="appearance-none bg-surface-elevated border border-surface-border
-                      rounded-xl pl-3.5 pr-8 py-2 text-[13px] text-[#c0c0ca]
-                      focus:outline-none focus:border-[#e8b86d30] transition-colors cursor-pointer"
-                  >
-                    {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.code}>{c.name}</option>
-                    ))}
-                  </select>
-                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#454550] text-[9px]">▾</span>
-                </div>
-              </div>
-
-              {/* Providers */}
-              <div>
-                <div className="flex items-center gap-2 mb-2.5">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#454550]">
-                    Streaming services
-                  </span>
-                  {selectedProviders.size > 0 && (
-                    <span className="text-[10px] text-accent font-mono">· {selectedProviders.size} selected</span>
-                  )}
-                </div>
-                {providersLoading ? (
-                  <div className="flex flex-wrap gap-2">
-                    {[...Array(8)].map((_, i) => (
-                      <div key={i} className="h-8 w-24 rounded-xl bg-surface-elevated animate-pulse" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {providers.map((p) => (
-                      <Toggle
-                        key={p.provider_id}
-                        pressed={selectedProviders.has(p.provider_id)}
-                        onPressedChange={(pressed) => toggleProvider(p.provider_id, pressed)}
-                        className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border text-[12px]
-                          text-[#606068] bg-surface-elevated border-surface-border cursor-pointer
-                          transition-all select-none hover:text-[#a0a0a8] hover:border-[#353540]
-                          data-[pressed]:border-[#e8b86d40] data-[pressed]:bg-accent-glow data-[pressed]:text-accent"
-                      >
-                        <img src={`https://image.tmdb.org/t/p/w45${p.logo_path}`} alt="" className="w-4 h-4 rounded object-cover" />
-                        {p.provider_name}
-                      </Toggle>
-                    ))}
-                    {providers.length === 0 && !providersLoading && (
-                      <p className="text-[12px] text-[#353540] italic">No providers found for this region</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setStep("type")}
-              className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl
-                bg-accent text-[#09090c] font-semibold text-[14px]
-                hover:bg-[#f0c87a] active:scale-[0.99] transition-all cursor-pointer"
-            >
-              Continue
-              <ArrowRightIcon size={14} weight="bold" />
-            </button>
-          </div>
-        )}
-
-        {/* ════════════════════════════════════════════════════
-            TYPE
-        ════════════════════════════════════════════════════ */}
-        {step === "type" && (
-          <div className="animate-slide-up">
-            <div className="mb-7">
-              <h1 className="font-display text-[2.6rem] font-semibold text-[#f0f0f2] leading-[1.15] mb-2">
-                What are you in<br />
-                <em className="text-accent not-italic">the mood for?</em>
-              </h1>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {([
-                { type: "movie" as const, icon: <FilmSlateIcon size={30} weight="duotone" className="text-accent" />, label: "Movie", sub: "Feature films" },
-                { type: "tv" as const, icon: <TelevisionIcon size={30} weight="duotone" className="text-accent" />, label: "TV Show", sub: "Series & episodes" },
-              ]).map(({ type, icon, label, sub }) => (
+            {/* Step indicator + settings */}
+            <div className="flex flex-col items-end gap-2.5 shrink-0 pb-0.5">
+              {step !== "setup" && (
                 <button
-                  key={type}
-                  onClick={() => { setMediaType(type); setStep("preferences") }}
-                  className="group relative flex flex-col items-center justify-center gap-3.5
-                    rounded-2xl border border-surface-border bg-surface-card
-                    py-11 px-6 cursor-pointer transition-all duration-200
-                    hover:border-[#e8b86d30] hover:bg-surface-elevated"
+                  onClick={() => setStep("setup")}
+                  className="p-2 border border-[#2E2620] text-[#3A2C1A] hover:border-[#4A3828] hover:text-[#8A7050] transition-colors"
+                  title="Settings"
                 >
-                  <div className="p-3 rounded-xl bg-surface-elevated border border-surface-border
-                    group-hover:border-[#e8b86d25] group-hover:bg-accent-glow transition-all">
-                    {icon}
-                  </div>
-                  <div className="text-center">
-                    <p className="font-display text-[1.25rem] font-semibold text-[#e8e8f0]">{label}</p>
-                    <p className="text-[11px] text-[#454550] mt-0.5">{sub}</p>
-                  </div>
-                  <ArrowRightIcon
-                    size={13}
-                    className="absolute bottom-3.5 right-3.5 text-[#353540] group-hover:text-accent transition-colors"
-                  />
+                  <GearSixIcon size={13} />
                 </button>
-              ))}
+              )}
+              {step !== "setup" && (
+                <div className="flex gap-[3px] items-center">
+                  {(["type", "preferences", "results"] as Step[]).map((s) => {
+                    const steps = ["type", "preferences", "results"]
+                    const sIdx = steps.indexOf(s)
+                    const cIdx = steps.indexOf(step)
+                    return (
+                      <div
+                        key={s}
+                        className="h-[3px] transition-all duration-300"
+                        style={{
+                          width: s === step ? "28px" : "10px",
+                          background:
+                            s === step ? "#C8281E"
+                            : sIdx < cIdx ? "#6A2018"
+                            : "#2E2620",
+                        }}
+                      />
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </div>
-        )}
 
-        {/* ════════════════════════════════════════════════════
-            PREFERENCES
-        ════════════════════════════════════════════════════ */}
-        {step === "preferences" && (
-          <div className="animate-slide-up">
-            <button
-              onClick={() => setStep("type")}
-              className="flex items-center gap-1.5 text-[12px] text-[#454550] hover:text-[#909098] transition-colors mb-6"
-            >
-              <ArrowLeftIcon size={12} />
-              Back
-            </button>
+          <div className="h-[3px] bg-[#C8281E]" />
+          <MarqueeLights className="px-0 mt-2" />
+        </header>
 
-            <div className="mb-7">
-              <h1 className="font-display text-[2.6rem] font-semibold text-[#f0f0f2] leading-[1.15] mb-2">
-                Tell us what you<br />
-                <em className="text-accent not-italic">want to feel.</em>
-              </h1>
-              <p className="text-[13px] text-[#585860]">All optional — any combo works.</p>
-            </div>
+        <div className="px-5">
 
-            <div className="space-y-2.5">
-              {/* Genre */}
-              <div className="rounded-2xl border border-surface-border bg-surface-card p-4">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[#454550] mb-3">Genre</p>
-                <div className="flex flex-wrap gap-2">
-                  {GENRES.map((g) => (
-                    <Toggle
-                      key={g}
-                      pressed={selectedGenres.has(g)}
-                      onPressedChange={() => setSelectedGenres((prev) => toggleSet(prev, g))}
-                      className="px-3 py-1.5 rounded-xl border text-[12px] cursor-pointer
-                        transition-all select-none bg-surface-elevated border-surface-border
-                        text-[#606068] hover:border-[#353540] hover:text-[#a0a0a8]
-                        data-[pressed]:border-[#e8b86d40] data-[pressed]:bg-accent-glow data-[pressed]:text-accent"
-                    >
-                      {g}
-                    </Toggle>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mood */}
-              <div className="rounded-2xl border border-surface-border bg-surface-card p-4">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[#454550] mb-3">Mood</p>
-                <div className="flex flex-wrap gap-2">
-                  {MOODS.map((mood) => (
-                    <Toggle
-                      key={mood}
-                      pressed={selectedMoods.has(mood)}
-                      onPressedChange={() => setSelectedMoods((prev) => toggleSet(prev, mood))}
-                      className="px-3 py-1.5 rounded-xl border text-[12px] cursor-pointer
-                        transition-all select-none bg-surface-elevated border-surface-border
-                        text-[#606068] hover:border-[#353540] hover:text-[#a0a0a8]
-                        data-[pressed]:border-[#e8b86d40] data-[pressed]:bg-accent-glow data-[pressed]:text-accent"
-                    >
-                      {mood}
-                    </Toggle>
-                  ))}
-                </div>
-              </div>
-
-              {/* Style */}
-              <div className="rounded-2xl border border-surface-border bg-surface-card p-4">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[#454550] mb-3">Style</p>
-                <div className="flex flex-wrap gap-2">
-                  {STYLES.map((style) => (
-                    <Toggle
-                      key={style}
-                      pressed={selectedStyles.has(style)}
-                      onPressedChange={() => setSelectedStyles((prev) => toggleSet(prev, style))}
-                      className="px-3 py-1.5 rounded-xl border text-[12px] cursor-pointer
-                        transition-all select-none bg-surface-elevated border-surface-border
-                        text-[#606068] hover:border-[#353540] hover:text-[#a0a0a8]
-                        data-[pressed]:border-[#e8b86d40] data-[pressed]:bg-accent-glow data-[pressed]:text-accent"
-                    >
-                      {style}
-                    </Toggle>
-                  ))}
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="rounded-2xl border border-surface-border bg-surface-card p-4 focus-within:border-[#e8b86d25] transition-colors">
-                <p className="text-[10px] font-mono uppercase tracking-widest text-[#454550] mb-2.5">
-                  Something specific? <span className="normal-case font-sans text-[#353540]">(optional)</span>
+          {/* ═══════════════════════════════════════════
+              SETUP
+          ═══════════════════════════════════════════ */}
+          {step === "setup" && (
+            <div className="animate-slide-up">
+              <div className="mb-7">
+                <SectionLabel>Lobby</SectionLabel>
+                <h2
+                  className="font-display leading-none text-[#F2ECD8]"
+                  style={{ fontSize: "clamp(2rem, 6vw, 2.6rem)", letterSpacing: "0.04em" }}
+                >
+                  Set Your Location
+                </h2>
+                <p className="font-serif italic text-[13px] text-[#6A5040] mt-1.5">
+                  We'll find what's playing near you.
                 </p>
-                <Field.Root className="w-full">
-                  <Field.Control
-                    render={<textarea ref={descRef} rows={1} />}
-                    value={description}
-                    onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
-                    placeholder="e.g. 'Something like Arrival but more emotional…'"
-                    className="w-full resize-none bg-transparent text-[13px] text-[#e0e0e4]
-                      placeholder:text-[#353540] focus:outline-none leading-relaxed"
-                  />
-                </Field.Root>
               </div>
-            </div>
 
-            <button
-              onClick={() => { void handleSubmit() }}
-              className="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-xl
-                bg-accent text-[#09090c] font-semibold text-[14px]
-                hover:bg-[#f0c87a] active:scale-[0.99] transition-all cursor-pointer"
-            >
-              <SparkleIcon size={14} weight="fill" />
-              Find something to watch
-            </button>
-          </div>
-        )}
+              <div className="border border-[#2E2620] bg-[#120F0C]">
+                <FilmStrip />
 
-        {/* ════════════════════════════════════════════════════
-            RESULTS
-        ════════════════════════════════════════════════════ */}
-        {step === "results" && (
-          <div ref={resultsRef} className="animate-slide-up">
-            <button
-              onClick={() => setStep("preferences")}
-              className="flex items-center gap-1.5 text-[12px] text-[#454550] hover:text-[#909098] transition-colors mb-6"
-            >
-              <ArrowLeftIcon size={12} />
-              Back
-            </button>
+                <div className="p-5 space-y-6">
+                  {/* Country */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <GlobeIcon size={10} className="text-[#4A3820]" />
+                      <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#4A3820]">
+                        Region
+                      </span>
+                    </div>
+                    <div className="relative inline-block">
+                      <select
+                        value={country}
+                        onChange={(e) => setCountry(e.target.value)}
+                        className="appearance-none bg-[#1A1612] border border-[#2E2620]
+                          pl-3 pr-8 py-2 font-mono text-[12px] text-[#B0A080] tracking-wider
+                          focus:outline-none focus:border-[#C8281E50] transition-colors cursor-pointer"
+                      >
+                        {COUNTRIES.map((c) => (
+                          <option key={c.code} value={c.code}>{c.name}</option>
+                        ))}
+                      </select>
+                      <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[#4A3820] text-[9px]">▾</span>
+                    </div>
+                  </div>
 
-            <div className="mb-6">
-              <h1 className="font-display text-[2.6rem] font-semibold text-[#f0f0f2] leading-[1.15]">
-                {isActive && recBlocks.length === 0
-                  ? <><em className="text-accent not-italic">Finding</em> your next watch…</>
-                  : <><em className="text-accent not-italic">Your picks</em> for tonight.</>
-                }
-              </h1>
-            </div>
+                  {/* Providers */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#4A3820]">
+                        Streaming Services
+                      </span>
+                      {selectedProviders.size > 0 && (
+                        <span className="font-mono text-[9px] text-[#C8281E] tracking-wider">
+                          · {selectedProviders.size} selected
+                        </span>
+                      )}
+                    </div>
 
-            {/* Progress steps */}
-            {(isActive || ss === "done" || ss === "error") && (
-              <div className="rounded-2xl border border-surface-border bg-surface-card p-4 mb-6 space-y-2.5">
-                {/* Search step */}
-                <div className="flex items-center gap-3">
-                  {ss === "searching" ? (
-                    <MagnifyingGlassIcon size={15} className="text-accent shrink-0 animate-pulse" />
-                  ) : (
-                    <CheckCircleIcon size={15} weight="fill" className="text-accent shrink-0" />
-                  )}
-                  <span className="text-[12px] text-[#808088]">
-                    {ss === "searching" ? "Searching TMDB…" : `Found ${foundCount ?? "?"} titles`}
-                  </span>
+                    {providersLoading ? (
+                      <div className="flex flex-wrap gap-2">
+                        {[...Array(8)].map((_, i) => (
+                          <div key={i} className="h-7 w-20 bg-[#1A1612] animate-pulse border border-[#2E2620]" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {providers.map((p) => (
+                          <Toggle
+                            key={p.provider_id}
+                            pressed={selectedProviders.has(p.provider_id)}
+                            onPressedChange={(pressed) => toggleProvider(p.provider_id, pressed)}
+                            className="flex items-center gap-1.5 px-2.5 py-1.5 border font-mono text-[10px]
+                              tracking-wider cursor-pointer select-none transition-all
+                              bg-[#120F0C] border-[#2E2620] text-[#5A4E3E]
+                              hover:border-[#4A3828] hover:text-[#9A8870]
+                              data-[pressed]:bg-[#C8281E18] data-[pressed]:border-[#C8281E60] data-[pressed]:text-[#F2A898]"
+                          >
+                            <img
+                              src={`https://image.tmdb.org/t/p/w45${p.logo_path}`}
+                              alt=""
+                              className="w-3.5 h-3.5 object-cover"
+                            />
+                            {p.provider_name}
+                          </Toggle>
+                        ))}
+                        {providers.length === 0 && !providersLoading && (
+                          <p className="font-mono text-[11px] text-[#3A2C18] italic tracking-wider">
+                            No providers found for this region
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* AI step */}
-                {(ss === "found" || ss === "streaming" || ss === "done") && (
-                  <div className="flex items-center gap-3">
-                    {ss === "done" ? (
-                      <CheckCircleIcon size={15} weight="fill" className="text-accent shrink-0" />
-                    ) : (
-                      <SparkleIcon size={15} weight="fill" className="text-accent shrink-0 animate-pulse" />
-                    )}
-                    <span className="text-[12px] text-[#808088]">
-                      {ss === "done" ? "Recommendations ready" : "Picking the best matches…"}
-                    </span>
-                  </div>
-                )}
+                <FilmStrip />
               </div>
-            )}
 
-            {/* Recommendation cards */}
-            {recBlocks.length > 0 && (
-              <div className="space-y-5">
-                {recBlocks.map((block) => (
-                  <RecCard key={block.key} block={block} />
+              <button
+                onClick={() => setStep("type")}
+                className="mt-4 w-full flex items-center justify-center gap-3 py-4
+                  bg-[#C8281E] text-[#F2ECD8] font-display tracking-[0.15em]
+                  hover:bg-[#D8301E] active:scale-[0.99] transition-all cursor-pointer"
+                style={{ fontSize: "1.3rem" }}
+              >
+                ENTER THE CINEMA
+                <ArrowRightIcon size={15} weight="bold" />
+              </button>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════
+              TYPE
+          ═══════════════════════════════════════════ */}
+          {step === "type" && (
+            <div className="animate-slide-up">
+              <div className="mb-7">
+                <SectionLabel>Now Showing</SectionLabel>
+                <h2
+                  className="font-display leading-none text-[#F2ECD8]"
+                  style={{ fontSize: "clamp(2rem, 6vw, 2.6rem)", letterSpacing: "0.04em" }}
+                >
+                  What Shall We Screen?
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {([
+                  {
+                    type: "movie" as const,
+                    icon: <FilmSlateIcon size={28} weight="fill" />,
+                    label: "Feature Film",
+                    sub: "A single story, one sitting",
+                  },
+                  {
+                    type: "tv" as const,
+                    icon: <TelevisionIcon size={28} weight="fill" />,
+                    label: "Television",
+                    sub: "Series & episodes",
+                  },
+                ]).map(({ type, icon, label, sub }) => (
+                  <button
+                    key={type}
+                    onClick={() => { setMediaType(type); setStep("preferences") }}
+                    className="group relative flex flex-col border border-[#2E2620] bg-[#120F0C]
+                      cursor-pointer transition-all duration-200 overflow-hidden text-left
+                      hover:border-[#C8281E50]"
+                  >
+                    {/* Red band */}
+                    <div className="h-[5px] w-full bg-[#C8281E] shrink-0 group-hover:bg-[#D8301E] transition-colors" />
+
+                    <div className="p-5 flex flex-col gap-4 flex-1">
+                      <span className="text-[#C8281E] group-hover:text-[#E03828] transition-colors">
+                        {icon}
+                      </span>
+                      <div>
+                        <p
+                          className="font-display leading-none text-[#F2ECD8] tracking-wide"
+                          style={{ fontSize: "1.45rem" }}
+                        >
+                          {label}
+                        </p>
+                        <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[#4A3820] mt-1.5">
+                          {sub}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="px-5 pb-4 flex items-center justify-between">
+                      <div className="flex gap-[5px]">
+                        {[0, 1, 2].map((i) => (
+                          <div
+                            key={i}
+                            className="w-[6px] h-[6px] rounded-full bg-[#0D0B08] border border-[#2E2620]"
+                          />
+                        ))}
+                      </div>
+                      <ArrowRightIcon
+                        size={12}
+                        className="text-[#2E2620] group-hover:text-[#C8281E] transition-colors"
+                      />
+                    </div>
+                  </button>
                 ))}
               </div>
-            )}
 
-            {/* Error */}
-            {ss === "error" && searchError && (
-              <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-[#1e1015] border border-[#3a1e24]">
-                {searchError.includes("429") ? (
-                  <SmileySadIcon size={16} weight="duotone" className="text-[#e87070] shrink-0 mt-0.5" />
-                ) : (
-                  <WarningIcon size={16} weight="duotone" className="text-[#e87070] shrink-0 mt-0.5" />
-                )}
-                <p className="text-[12px] text-[#e87070] leading-relaxed">
-                  {searchError.includes("429")
-                    ? "Too many requests — take a breath and try again in a minute."
-                    : `Something went wrong: ${searchError}`}
+              <button
+                onClick={() => setStep("setup")}
+                className="flex items-center gap-1.5 mt-5 font-mono text-[9px] uppercase tracking-[0.25em] text-[#3A2C18] hover:text-[#8A7050] transition-colors"
+              >
+                <ArrowLeftIcon size={10} />
+                Change Region
+              </button>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════
+              PREFERENCES
+          ═══════════════════════════════════════════ */}
+          {step === "preferences" && (
+            <div className="animate-slide-up">
+              <button
+                onClick={() => setStep("type")}
+                className="flex items-center gap-1.5 mb-7 font-mono text-[9px] uppercase tracking-[0.25em] text-[#3A2C18] hover:text-[#8A7050] transition-colors"
+              >
+                <ArrowLeftIcon size={10} />
+                Back
+              </button>
+
+              <div className="mb-7">
+                <SectionLabel>Programme</SectionLabel>
+                <h2
+                  className="font-display leading-none text-[#F2ECD8]"
+                  style={{ fontSize: "clamp(2rem, 6vw, 2.6rem)", letterSpacing: "0.04em" }}
+                >
+                  Curate Your Selection
+                </h2>
+                <p className="font-serif italic text-[13px] text-[#6A5040] mt-1.5">
+                  All optional — any combination works.
                 </p>
               </div>
-            )}
 
-            {/* Done actions */}
-            {(ss === "done" || ss === "error") && (
-              <div className="flex items-center gap-4 mt-7 pt-5 border-t border-surface-border">
-                <Button
-                  onClick={() => { void handleSubmit() }}
-                  className="flex items-center gap-1.5 text-[12px] text-[#808088]
-                    hover:text-[#c0c0c8] transition-colors cursor-pointer"
-                >
-                  <SparkleIcon size={12} />
-                  Try again
-                </Button>
-                <Button
-                  onClick={startOver}
-                  className="ml-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl
-                    bg-surface-elevated border border-surface-border text-[12px]
-                    text-[#808088] hover:border-[#353540] hover:text-[#c0c0c8]
-                    transition-all cursor-pointer"
-                >
-                  Start over
-                  <ArrowRightIcon size={12} />
-                </Button>
+              <div className="space-y-2.5">
+                <PrefCard label="Genre">
+                  <div className="flex flex-wrap gap-1.5">
+                    {GENRES.map((g) => (
+                      <Toggle
+                        key={g}
+                        pressed={selectedGenres.has(g)}
+                        onPressedChange={() => setSelectedGenres((prev) => toggleSet(prev, g))}
+                        className={pill}
+                      >
+                        {g}
+                      </Toggle>
+                    ))}
+                  </div>
+                </PrefCard>
+
+                <PrefCard label="Mood">
+                  <div className="flex flex-wrap gap-1.5">
+                    {MOODS.map((mood) => (
+                      <Toggle
+                        key={mood}
+                        pressed={selectedMoods.has(mood)}
+                        onPressedChange={() => setSelectedMoods((prev) => toggleSet(prev, mood))}
+                        className={pill}
+                      >
+                        {mood}
+                      </Toggle>
+                    ))}
+                  </div>
+                </PrefCard>
+
+                <PrefCard label="Style">
+                  <div className="flex flex-wrap gap-1.5">
+                    {STYLES.map((style) => (
+                      <Toggle
+                        key={style}
+                        pressed={selectedStyles.has(style)}
+                        onPressedChange={() => setSelectedStyles((prev) => toggleSet(prev, style))}
+                        className={pill}
+                      >
+                        {style}
+                      </Toggle>
+                    ))}
+                  </div>
+                </PrefCard>
+
+                {/* Description */}
+                <div className="border border-[#2E2620] bg-[#120F0C] overflow-hidden focus-within:border-[#C8281E40] transition-colors">
+                  <FilmStrip />
+                  <div className="p-4">
+                    <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-[#4A3820] mb-3">
+                      Describe It{" "}
+                      <span className="normal-case font-sans tracking-normal text-[#2A2018]">
+                        (optional)
+                      </span>
+                    </p>
+                    <Field.Root className="w-full">
+                      <Field.Control
+                        render={<textarea ref={descRef} rows={1} />}
+                        value={description}
+                        onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
+                        placeholder="e.g. 'Something like Arrival but more emotional…'"
+                        className="w-full resize-none bg-transparent font-sans text-[13px] text-[#C0A880]
+                          placeholder:text-[#2E2418] focus:outline-none leading-relaxed"
+                      />
+                    </Field.Root>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        )}
 
-        <footer className="mt-16 text-[10px] font-mono text-[#252530] text-center">
-          Powered by OpenRouter · TMDB · Built with Hono + React
+              <button
+                onClick={() => { void handleSubmit() }}
+                className="mt-4 w-full flex items-center justify-center gap-3 py-4
+                  bg-[#C8281E] text-[#F2ECD8] font-display tracking-[0.15em]
+                  hover:bg-[#D8301E] active:scale-[0.99] transition-all cursor-pointer"
+                style={{ fontSize: "1.3rem" }}
+              >
+                <FilmSlateIcon size={17} weight="fill" />
+                LIGHTS DOWN
+              </button>
+            </div>
+          )}
+
+          {/* ═══════════════════════════════════════════
+              RESULTS
+          ═══════════════════════════════════════════ */}
+          {step === "results" && (
+            <div ref={resultsRef} className="animate-slide-up">
+              <button
+                onClick={() => setStep("preferences")}
+                className="flex items-center gap-1.5 mb-7 font-mono text-[9px] uppercase tracking-[0.25em] text-[#3A2C18] hover:text-[#8A7050] transition-colors"
+              >
+                <ArrowLeftIcon size={10} />
+                Back
+              </button>
+
+              <div className="mb-6">
+                <SectionLabel>Now Playing</SectionLabel>
+                <h2
+                  className="font-display leading-none text-[#F2ECD8]"
+                  style={{ fontSize: "clamp(2rem, 6vw, 2.6rem)", letterSpacing: "0.04em" }}
+                >
+                  {isActive && recBlocks.length === 0
+                    ? "Finding Your Film…"
+                    : "Tonight's Selection"
+                  }
+                </h2>
+                {!isActive && recBlocks.length > 0 && (
+                  <p className="font-serif italic text-[13px] text-[#6A5040] mt-1.5">
+                    Curated for your viewing pleasure.
+                  </p>
+                )}
+              </div>
+
+              {/* Progress */}
+              {(isActive || ss === "done" || ss === "error") && (
+                <div className="border border-[#2E2620] bg-[#120F0C] mb-6 overflow-hidden">
+                  <FilmStrip />
+                  <div className="p-4 space-y-3">
+                    <div className="flex items-center gap-3">
+                      {ss === "searching" ? (
+                        <MagnifyingGlassIcon size={12} className="text-[#C8281E] shrink-0 animate-pulse" />
+                      ) : (
+                        <CheckCircleIcon size={12} weight="fill" className="text-[#C8281E] shrink-0" />
+                      )}
+                      <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-[#6A5840]">
+                        {ss === "searching"
+                          ? "Searching Archives…"
+                          : `Found ${foundCount ?? "?"} Titles`
+                        }
+                      </span>
+                    </div>
+
+                    {(ss === "found" || ss === "streaming" || ss === "done") && (
+                      <div className="flex items-center gap-3">
+                        {ss === "done" ? (
+                          <CheckCircleIcon size={12} weight="fill" className="text-[#C8281E] shrink-0" />
+                        ) : (
+                          <SparkleIcon size={12} weight="fill" className="text-[#C9922A] shrink-0 animate-pulse" />
+                        )}
+                        <span className="font-mono text-[9px] uppercase tracking-[0.25em] text-[#6A5840]">
+                          {ss === "done" ? "Programme Ready" : "Selecting Best Matches…"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <FilmStrip />
+                </div>
+              )}
+
+              {/* Rec cards */}
+              {recBlocks.length > 0 && (
+                <div className="border border-[#2E2620] overflow-hidden">
+                  {recBlocks.map((block) => (
+                    <RecCard key={block.key} block={block} />
+                  ))}
+                </div>
+              )}
+
+              {/* Error */}
+              {ss === "error" && searchError && (
+                <div className="flex items-start gap-3 px-4 py-3.5 border border-[#5A1A14] bg-[#1A0C0A]">
+                  {searchError.includes("429") ? (
+                    <SmileySadIcon size={13} weight="duotone" className="text-[#C8281E] shrink-0 mt-0.5" />
+                  ) : (
+                    <WarningIcon size={13} weight="duotone" className="text-[#C8281E] shrink-0 mt-0.5" />
+                  )}
+                  <p className="font-mono text-[10px] text-[#C05050] leading-relaxed tracking-[0.1em]">
+                    {searchError.includes("429")
+                      ? "Too many requests — take a breath and try again in a minute."
+                      : `Something went wrong: ${searchError}`}
+                  </p>
+                </div>
+              )}
+
+              {/* Done actions */}
+              {(ss === "done" || ss === "error") && (
+                <div className="flex items-center gap-4 mt-7 pt-5 border-t border-[#2E2620]">
+                  <Button
+                    onClick={() => { void handleSubmit() }}
+                    className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.25em] text-[#3A2C18] hover:text-[#8A7050] transition-colors cursor-pointer"
+                  >
+                    <SparkleIcon size={11} />
+                    Try Again
+                  </Button>
+                  <Button
+                    onClick={startOver}
+                    className="ml-auto flex items-center gap-2 px-4 py-2 border border-[#2E2620] bg-[#120F0C]
+                      font-mono text-[9px] uppercase tracking-[0.25em] text-[#3A2C18]
+                      hover:border-[#4A3828] hover:text-[#8A7050] transition-all cursor-pointer"
+                  >
+                    New Search
+                    <ArrowRightIcon size={10} />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+        </div>{/* /px-5 */}
+
+        {/* Footer */}
+        <footer className="mt-20 px-0">
+          <div className="h-[3px] bg-[#C8281E]" />
+          <MarqueeLights className="mt-2 mb-3" />
+          <p className="font-mono text-[8px] uppercase tracking-[0.3em] text-[#2A1E10] text-center">
+            Powered by OpenRouter &nbsp;·&nbsp; TMDB &nbsp;·&nbsp; Built with Hono + React
+          </p>
         </footer>
+
       </div>
     </div>
   )
