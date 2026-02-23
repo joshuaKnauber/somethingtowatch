@@ -5,6 +5,7 @@ import { dirname, join } from 'path'
 config({ path: join(dirname(fileURLToPath(import.meta.url)), '../../.env') })
 
 import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { streamText, generateObject } from 'ai'
@@ -72,7 +73,7 @@ const app = new Hono()
 app.use(
   '/api/*',
   cors({
-    origin: ['http://localhost:5173'],
+    origin: '*',
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type'],
   }),
@@ -328,6 +329,10 @@ Recommend the best matches.`,
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   })
 })
+
+// ── Static client files ────────────────────────────────────────────────────
+app.use('/*', serveStatic({ root: '../client/dist' }))
+app.get('/*', serveStatic({ path: 'index.html', root: '../client/dist' }))
 
 // ── Start ──────────────────────────────────────────────────────────────────
 const port = Number(process.env.PORT ?? 3000)
