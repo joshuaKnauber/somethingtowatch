@@ -138,6 +138,8 @@ app.post('/api/recommend', async (c) => {
     moods = [],
     styles = [],
     description = '',
+    liked = [],
+    disliked = [],
   } = body
 
   const genreIdMap = mediaType === 'movie' ? MOVIE_GENRE_IDS : TV_GENRE_IDS
@@ -250,7 +252,16 @@ Similar titles should be real, recognisable ${mediaType === 'movie' ? 'films' : 
         }
         pool.push(...tail)
 
-        const items = pool.slice(0, 30).map((r) => {
+        // Filter out titles the user has already seen (liked or disliked)
+        const seenTitles = new Set([
+          ...(liked as string[]).map((t: string) => t.toLowerCase()),
+          ...(disliked as string[]).map((t: string) => t.toLowerCase()),
+        ])
+        const freshPool = seenTitles.size > 0
+          ? pool.filter(r => !seenTitles.has((r.title ?? r.name ?? '').toLowerCase()))
+          : pool
+
+        const items = freshPool.slice(0, 30).map((r) => {
           const title = r.title ?? r.name ?? 'Unknown'
           const year = (r.release_date ?? r.first_air_date ?? '').slice(0, 4)
           const rating = r.vote_average?.toFixed(1) ?? '?'
@@ -273,6 +284,15 @@ Similar titles should be real, recognisable ${mediaType === 'movie' ? 'films' : 
           providerIds.length > 0 ? `(On selected services in ${country})` : null,
         ].filter(Boolean).join('\n')
 
+        const feedbackParts = [
+          (liked as string[]).length > 0
+            ? `Titles they ENJOYED — find more like these: ${(liked as string[]).join(', ')}`
+            : null,
+          (disliked as string[]).length > 0
+            ? `Titles they did NOT enjoy — avoid this tone/style: ${(disliked as string[]).join(', ')}`
+            : null,
+        ].filter(Boolean).join('\n')
+
         const result = streamText({
           model: openrouter('x-ai/grok-4.1-fast'),
           temperature: 1.1,
@@ -282,7 +302,13 @@ Format EXACTLY like this (include [img:...] if listed for that title):
 **[Title]** ([Year]) · [Genre/Vibe] [img:[poster_path]]
 _Why you'll love it:_ [1–2 warm, specific sentences]
 Pick 3–5 titles. Be enthusiastic and personal. Vary your selections — avoid repeating the same picks you may have chosen before.`,
-          prompt: `Looking for: ${mediaType === 'movie' ? 'a movie' : 'a TV show'}\n${prefsParts}\n\nAvailable titles (pick from anywhere in this list):\n${items}\n\nRecommend the best matches.`,
+          prompt: `Looking for: ${mediaType === 'movie' ? 'a movie' : 'a TV show'}
+${prefsParts}${feedbackParts ? `\n\nUser feedback on previous results:\n${feedbackParts}` : ''}
+
+Available titles (pick from anywhere in this list):
+${items}
+
+Recommend the best matches.`,
           maxTokens: 900,
         })
 

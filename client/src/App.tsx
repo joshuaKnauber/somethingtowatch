@@ -12,6 +12,8 @@ import {
   SmileySadIcon,
   SparkleIcon,
   TelevisionIcon,
+  ThumbsDownIcon,
+  ThumbsUpIcon,
   WarningIcon,
 } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
@@ -218,7 +220,13 @@ function parseBlocks(text: string): RecBlock[] {
   return blocks;
 }
 
-function RecCard({ block }: { block: RecBlock }) {
+function RecCard({ block, isLiked, isDisliked, onLike, onDislike }: {
+  block: RecBlock
+  isLiked: boolean
+  isDisliked: boolean
+  onLike: () => void
+  onDislike: () => void
+}) {
   return (
     <div className="flex animate-slide-in border-b border-[#2E2620] last:border-b-0">
       {/* Left perforations */}
@@ -246,11 +254,11 @@ function RecCard({ block }: { block: RecBlock }) {
         ) : (
           <div
             className="shrink-0 self-start bg-[#1E1A16] border border-[#2E2620]"
-            style={{ width: "52px", aspectRatio: "2/3" }}
+            style={{ width: "72px", aspectRatio: "2/3" }}
           />
         )}
 
-        <div className="flex-1 min-w-0 pt-0.5">
+        <div className="flex-1 min-w-0 pt-0.5 flex flex-col">
           <p className="font-display text-[1.45rem] leading-none tracking-wider text-[#F2ECD8] uppercase">
             {block.title}
           </p>
@@ -262,6 +270,28 @@ function RecCard({ block }: { block: RecBlock }) {
               {block.description}
             </p>
           )}
+
+          {/* Feedback */}
+          <div className="flex gap-4 mt-3 pt-2.5 border-t border-[#1E1A16]">
+            <button
+              onClick={onLike}
+              className={`flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.15em] transition-colors cursor-pointer ${
+                isLiked ? "text-[#C9922A]" : "text-[#4A3828] hover:text-[#8A7050]"
+              }`}
+            >
+              <ThumbsUpIcon size={11} weight={isLiked ? "fill" : "regular"} />
+              {isLiked ? "Liked" : "Like"}
+            </button>
+            <button
+              onClick={onDislike}
+              className={`flex items-center gap-1.5 font-mono text-[8px] uppercase tracking-[0.15em] transition-colors cursor-pointer ${
+                isDisliked ? "text-[#C8281E]" : "text-[#4A3828] hover:text-[#8A7050]"
+              }`}
+            >
+              <ThumbsDownIcon size={11} weight={isDisliked ? "fill" : "regular"} />
+              {isDisliked ? "Not for me" : "Not for me"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -335,6 +365,10 @@ export default function App() {
   const [selectedMoods, setSelectedMoods] = useState<Set<string>>(new Set());
   const [selectedStyles, setSelectedStyles] = useState<Set<string>>(new Set());
   const [description, setDescription] = useState("");
+
+  // ── Feedback (persists across refinements)
+  const [likedTitles, setLikedTitles] = useState<Set<string>>(new Set());
+  const [dislikedTitles, setDislikedTitles] = useState<Set<string>>(new Set());
 
   // ── Search state
   const [searchState, setSearchState] = useState<SearchState>({
@@ -410,6 +444,16 @@ export default function App() {
     return next;
   }
 
+  function toggleFeedback(title: string, type: "like" | "dislike") {
+    if (type === "like") {
+      setLikedTitles((prev) => toggleSet(prev, title));
+      setDislikedTitles((prev) => { const n = new Set(prev); n.delete(title); return n; });
+    } else {
+      setDislikedTitles((prev) => toggleSet(prev, title));
+      setLikedTitles((prev) => { const n = new Set(prev); n.delete(title); return n; });
+    }
+  }
+
   // ── Streaming fetch
   async function handleSubmit() {
     setSearchState({
@@ -432,6 +476,8 @@ export default function App() {
           moods: [...selectedMoods],
           styles: [...selectedStyles],
           description,
+          liked: [...likedTitles],
+          disliked: [...dislikedTitles],
         }),
       });
 
@@ -500,6 +546,8 @@ export default function App() {
     setSelectedMoods(new Set());
     setSelectedStyles(new Set());
     setDescription("");
+    setLikedTitles(new Set());
+    setDislikedTitles(new Set());
     setSearchState({
       status: "idle",
       foundCount: null,
@@ -1043,7 +1091,14 @@ export default function App() {
               {recBlocks.length > 0 && (
                 <div className="border border-[#2E2620] overflow-hidden">
                   {recBlocks.map((block) => (
-                    <RecCard key={block.key} block={block} />
+                    <RecCard
+                      key={block.key}
+                      block={block}
+                      isLiked={likedTitles.has(block.title)}
+                      isDisliked={dislikedTitles.has(block.title)}
+                      onLike={() => toggleFeedback(block.title, "like")}
+                      onDislike={() => toggleFeedback(block.title, "dislike")}
+                    />
                   ))}
                 </div>
               )}
@@ -1074,25 +1129,63 @@ export default function App() {
 
               {/* Done actions */}
               {(ss === "done" || ss === "error") && (
-                <div className="flex items-center gap-4 mt-7 pt-5 border-t border-[#2E2620]">
-                  <Button
-                    onClick={() => {
-                      void handleSubmit();
-                    }}
-                    className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.25em] text-[#7A6848] hover:text-[#C0A880] transition-colors cursor-pointer"
-                  >
-                    <SparkleIcon size={11} />
-                    Try Again
-                  </Button>
-                  <Button
-                    onClick={startOver}
-                    className="ml-auto flex items-center gap-2 px-4 py-2 border border-[#2E2620] bg-[#120F0C]
-                      font-mono text-[9px] uppercase tracking-[0.25em] text-[#7A6848]
-                      hover:border-[#4A3828] hover:text-[#C0A880] transition-all cursor-pointer"
-                  >
-                    New Search
-                    <ArrowRightIcon size={10} />
-                  </Button>
+                <div className="mt-7 pt-5 border-t border-[#2E2620] space-y-3">
+
+                  {/* Refine row — shown when any feedback given */}
+                  {(likedTitles.size > 0 || dislikedTitles.size > 0) && (
+                    <div className="border border-[#2E2620] bg-[#120F0C] overflow-hidden">
+                      <FilmStrip />
+                      <div className="px-4 py-3 flex items-center gap-3">
+                        <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.2em]">
+                          {likedTitles.size > 0 && (
+                            <span className="flex items-center gap-1 text-[#C9922A]">
+                              <ThumbsUpIcon size={10} weight="fill" />
+                              {likedTitles.size}
+                            </span>
+                          )}
+                          {dislikedTitles.size > 0 && (
+                            <span className="flex items-center gap-1 text-[#C8281E]">
+                              <ThumbsDownIcon size={10} weight="fill" />
+                              {dislikedTitles.size}
+                            </span>
+                          )}
+                          <span className="text-[#8A7050]">picks rated</span>
+                        </div>
+                        <button
+                          onClick={() => { void handleSubmit(); }}
+                          className="ml-auto flex items-center gap-2 px-4 py-2
+                            bg-[#C9922A] text-[#0D0B08] font-display tracking-[0.1em]
+                            hover:bg-[#D9A030] active:scale-[0.99] transition-all cursor-pointer"
+                          style={{ fontSize: "1rem" }}
+                        >
+                          REFINE MY PICKS
+                          <ArrowRightIcon size={11} weight="bold" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Secondary actions */}
+                  <div className="flex items-center gap-4">
+                    {likedTitles.size === 0 && dislikedTitles.size === 0 && (
+                      <Button
+                        onClick={() => { void handleSubmit(); }}
+                        className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.25em] text-[#7A6848] hover:text-[#C0A880] transition-colors cursor-pointer"
+                      >
+                        <SparkleIcon size={11} />
+                        Try Again
+                      </Button>
+                    )}
+                    <Button
+                      onClick={startOver}
+                      className="ml-auto flex items-center gap-2 px-4 py-2 border border-[#2E2620] bg-[#120F0C]
+                        font-mono text-[9px] uppercase tracking-[0.25em] text-[#7A6848]
+                        hover:border-[#4A3828] hover:text-[#C0A880] transition-all cursor-pointer"
+                    >
+                      New Search
+                      <ArrowRightIcon size={10} />
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
