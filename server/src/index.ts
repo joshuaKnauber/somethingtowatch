@@ -56,6 +56,111 @@ const TV_GENRE_IDS: Record<string, number> = {
   Romance: 10749, Horror: 27, Thriller: 53,
 }
 
+// ── OG Image HTML ──────────────────────────────────────────────────────────
+const OG_IMAGE_HTML = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400&family=Lora:ital,wght@1,400&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1200px;height:630px;overflow:hidden;background:#0D0B08;color:#F2ECD8;-webkit-font-smoothing:antialiased}
+.root{width:1200px;height:630px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.glow{position:absolute;pointer-events:none}
+.glow-a{top:-80px;left:20%;width:800px;height:500px;background:radial-gradient(ellipse,rgba(200,40,30,.1) 0%,transparent 60%)}
+.glow-b{bottom:-60px;right:60px;width:500px;height:350px;background:radial-gradient(ellipse,rgba(201,146,42,.07) 0%,transparent 60%)}
+.strip{height:18px;flex-shrink:0;background-color:#1A1612;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='18'%3E%3Crect x='3' y='3' width='8' height='12' rx='1' fill='%230D0B08'/%3E%3Crect x='15' y='3' width='8' height='12' rx='1' fill='%230D0B08'/%3E%3C/svg%3E");background-repeat:repeat-x;background-size:26px 18px}
+.marquee{height:8px;flex-shrink:0;background-color:#0D0B08;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='8'%3E%3Ccircle cx='2' cy='4' r='2' fill='%23F0DFA0' opacity='.95'/%3E%3Ccircle cx='11' cy='4' r='2' fill='%232E2418' opacity='.2'/%3E%3Ccircle cx='20' cy='4' r='2' fill='%23C9922A' opacity='.65'/%3E%3Ccircle cx='29' cy='4' r='2' fill='%232E2418' opacity='.2'/%3E%3Ccircle cx='38' cy='4' r='2' fill='%232E2418' opacity='.2'/%3E%3C/svg%3E");background-repeat:repeat-x;background-size:45px 8px}
+.band{height:4px;background:#C8281E;flex-shrink:0}
+.body{flex:1;display:flex;overflow:hidden}
+.perfs{width:28px;flex-shrink:0;background:#161210;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;padding:18px 0}
+.perf{width:11px;height:8px;border-radius:2px;background:#0D0B08;border:1px solid #252018}
+.main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 52px 0 56px;border-right:1px solid #2E2620}
+.label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.35em;color:#8A7050;margin-bottom:16px}
+.title{font-family:'Bebas Neue',sans-serif;font-size:118px;line-height:.88;color:#F2ECD8;letter-spacing:.03em;text-shadow:0 0 100px rgba(200,40,30,.2),0 4px 12px rgba(0,0,0,.8)}
+.divider{width:48px;height:3px;background:#C8281E;margin:22px 0}
+.tagline{font-family:'Lora',Georgia,serif;font-style:italic;font-size:17px;color:#A89070;line-height:1.5;margin-bottom:22px}
+.metas{display:flex;align-items:center;gap:10px}
+.meta{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.2em;color:#C9922A}
+.dot{font-family:'DM Mono',monospace;font-size:9px;color:#3A3020}
+.panel{width:280px;flex-shrink:0;display:flex;flex-direction:column;padding:28px 24px;gap:12px}
+.plabel{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.3em;color:#8A7050;text-align:center}
+.frame{flex:1;border:1px solid #2E2620;background:#120F0C;overflow:hidden;display:flex;flex-direction:column}
+.fs{height:10px;flex-shrink:0;background-color:#1A1612;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='10'%3E%3Crect x='3' y='2' width='8' height='6' rx='1' fill='%230D0B08'/%3E%3Crect x='15' y='2' width='8' height='6' rx='1' fill='%230D0B08'/%3E%3C/svg%3E");background-repeat:repeat-x;background-size:26px 10px}
+.fbody{flex:1;padding:16px;display:flex;flex-direction:column;gap:8px}
+.gl{font-family:'DM Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.3em;color:#6A5840;margin-bottom:3px}
+.pill{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;padding:5px 10px;border:1px solid #2E2620;background:#1A1612;color:#9A8870}
+.pon{color:#F2A898;background:#C8281E15;border-color:#C8281E55}
+.pgold{color:#C9922A;border-color:#C9922A30;text-align:center}
+.purl{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.15em;color:#4A3828;text-align:center}
+</style>
+</head>
+<body>
+<div class="root">
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+  <div class="strip"></div>
+  <div class="marquee"></div>
+  <div class="band"></div>
+  <div class="body">
+    <div class="perfs">
+      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+      <div class="perf"></div>
+    </div>
+    <div class="main">
+      <div class="label">&#8212; Now Presenting &#8212;</div>
+      <div class="title">Something<br>to Watch</div>
+      <div class="divider"></div>
+      <div class="tagline">presented for your viewing pleasure</div>
+      <div class="metas">
+        <span class="meta">AI-Powered</span>
+        <span class="dot">&middot;</span>
+        <span class="meta">Movie &amp; TV</span>
+        <span class="dot">&middot;</span>
+        <span class="meta">Recommendations</span>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="plabel">&#8212; Tonight&#8217;s Selection &#8212;</div>
+      <div class="frame">
+        <div class="fs"></div>
+        <div class="fbody">
+          <div>
+            <div class="gl">Genre</div>
+            <div class="pill pon">Action &middot; Thriller</div>
+          </div>
+          <div>
+            <div class="gl">Mood</div>
+            <div class="pill pon">Dark &amp; Gritty</div>
+          </div>
+          <div>
+            <div class="gl">Style</div>
+            <div class="pill">Widescreen Epic</div>
+          </div>
+          <div style="margin-top:auto;padding-top:12px;border-top:1px solid #1E1A16">
+            <div class="pill pgold">AI Picks Best Matches &#10022;</div>
+          </div>
+        </div>
+        <div class="fs"></div>
+      </div>
+      <div class="purl">somethingto.watch</div>
+    </div>
+    <div class="perfs">
+      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+      <div class="perf"></div>
+    </div>
+  </div>
+  <div class="band"></div>
+  <div class="marquee"></div>
+  <div class="strip"></div>
+</div>
+</body>
+</html>`
+
 // ── TMDB helper ────────────────────────────────────────────────────────────
 async function tmdbFetch(path: string, params: Record<string, string> = {}) {
   const url = new URL(`https://api.themoviedb.org/3${path}`)
@@ -128,6 +233,8 @@ app.post('/api/recommend', async (c) => {
     moods?: string[]
     styles?: string[]
     description?: string
+    liked?: string[]
+    disliked?: string[]
   }
   try { body = await c.req.json() } catch { return c.json({ error: 'Invalid JSON' }, 400) }
 
@@ -172,15 +279,19 @@ app.post('/api/recommend', async (c) => {
         if (selectedGenreIds.length > 0) {
           baseParams.with_genres = selectedGenreIds.join(',')
         }
+        // watch_region alone is a no-op on TMDB — it must be paired with either
+        // with_watch_providers or with_watch_monetization_types to actually filter results.
         if (providerIds.length > 0) {
           baseParams.with_watch_providers = providerIds.join('|')
           baseParams.watch_region = country
+        } else {
+          // No specific providers selected — filter to anything streamable in the region.
+          baseParams.watch_region = country
+          baseParams.with_watch_monetization_types = 'flatrate|free|ads'
         }
 
-        const searchQ = [...genres, ...moods].slice(0, 2).join(' ')
-
-        // Phase 1: general TMDB discover + description filter generation — all in parallel
-        const [filterResult, ...tmdbResults] = await Promise.allSettled([
+        // Phase 1: discover fetches (region-filtered) + description filter generation — all in parallel
+        const [filterResult, disc1, disc2, disc3, disc4, disc5] = await Promise.allSettled([
           // If description provided, use a fast model to extract targeted search terms
           description.trim()
             ? generateObject({
@@ -198,16 +309,14 @@ Search queries should be 2-4 words capturing themes, tone, or style.
 Similar titles should be real, recognisable ${mediaType === 'movie' ? 'films' : 'shows'}.`,
               })
             : Promise.resolve(null),
-          // General discover fetches
+          // General discover fetches — all use baseParams which always includes watch_region
           tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'popularity.desc', page: '1' }),
           tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'popularity.desc', page: '2' }),
           tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'popularity.desc', page: '3' }),
           tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'vote_average.desc', 'vote_count.gte': '150', page: '1' }),
           tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'vote_average.desc', 'vote_count.gte': '150', page: '2' }),
-          searchQ
-            ? tmdbFetch(`/search/${mediaType}`, { query: searchQ, include_adult: 'false' })
-            : Promise.resolve({ results: [] }),
         ])
+        const discoverFetches = [disc1, disc2, disc3, disc4, disc5]
 
         // Phase 2: if filters were generated, run targeted TMDB searches
         const descriptionPool: TmdbItem[] = []
@@ -225,18 +334,34 @@ Similar titles should be real, recognisable ${mediaType === 'movie' ? 'films' : 
           }
         }
 
-        // Merge with deduplication — description-derived results go first (priority)
+        // Build the set of IDs from region-filtered discover calls.
+        const discoverIds = new Set<number>()
+        for (const res of discoverFetches) {
+          if (res.status !== 'fulfilled') continue
+          for (const item of (res.value.results ?? []) as TmdbItem[]) {
+            if (item.id != null) discoverIds.add(item.id)
+          }
+        }
+
+        // Description pool: only keep items that also appear in the regional discover pool.
+        // /search/ has no region filter so unvalidated results must not get priority.
+        const priorityDesc = discoverIds.size > 0
+          ? descriptionPool.filter(item => item.id != null && discoverIds.has(item.id))
+          : descriptionPool
+
+        // Merge with deduplication — region-valid description results go first (priority)
         const seen = new Set<number>()
         const pool: TmdbItem[] = []
 
-        for (const item of descriptionPool) {
+        for (const item of priorityDesc) {
           if (item.id == null || seen.has(item.id)) continue
           seen.add(item.id)
           pool.push(item)
         }
         const descCount = pool.length
 
-        for (const res of tmdbResults) {
+        // Add discover results (all region-filtered)
+        for (const res of discoverFetches) {
           if (res.status !== 'fulfilled') continue
           for (const item of (res.value.results ?? []) as TmdbItem[]) {
             if (item.id == null || seen.has(item.id)) continue
@@ -262,21 +387,14 @@ Similar titles should be real, recognisable ${mediaType === 'movie' ? 'films' : 
           ? pool.filter(r => !seenTitles.has((r.title ?? r.name ?? '').toLowerCase()))
           : pool
 
-        const items = freshPool.slice(0, 30).map((r) => {
-          const title = r.title ?? r.name ?? 'Unknown'
-          const year = (r.release_date ?? r.first_air_date ?? '').slice(0, 4)
-          const rating = r.vote_average?.toFixed(1) ?? '?'
-          const overview = r.overview?.slice(0, 200) ?? ''
-          const img = r.poster_path ? ` [img:${r.poster_path}]` : ''
-          return `• ${title} (${year})${img} [${rating}★] — ${overview}`
-        }).join('\n')
+        const poolSlice = freshPool.slice(0, 30)
 
         // ── Phase 2: signal found count ───────────────────────────────────
         controller.enqueue(encoder.encode(`[FOUND:${pool.length}]\n`))
 
-        console.log(`[recommend] found ${pool.length} titles, streaming AI…`)
+        console.log(`[recommend] pool: ${poolSlice.map(r => r.title ?? r.name).join(', ')}`)
 
-        // ── Phase 3: AI stream ────────────────────────────────────────────
+        // ── Phase 3: AI picks + stream ────────────────────────────────────
         const prefsParts = [
           genres.length > 0 ? `Genres: ${genres.join(', ')}` : null,
           moods.length > 0 ? `Mood: ${moods.join(', ')}` : null,
@@ -294,22 +412,59 @@ Similar titles should be real, recognisable ${mediaType === 'movie' ? 'films' : 
             : null,
         ].filter(Boolean).join('\n')
 
+        // Step 1: structured index selection — model picks by number so it cannot
+        // hallucinate a title that isn't in the pool.
+        const numberedList = poolSlice.map((r, i) => {
+          const title = r.title ?? r.name ?? 'Unknown'
+          const year = (r.release_date ?? r.first_air_date ?? '').slice(0, 4)
+          const rating = r.vote_average?.toFixed(1) ?? '?'
+          const overview = r.overview?.slice(0, 150) ?? ''
+          return `${i}. ${title} (${year}) [${rating}★] — ${overview}`
+        }).join('\n')
+
+        const selection = await generateObject({
+          model: openrouter('openai/gpt-4o-mini'),
+          schema: z.object({
+            picks: z.array(z.object({
+              index: z.number().int().min(0).max(29).describe('index from the numbered list'),
+              vibe: z.string().describe('2–4 word genre/vibe label, e.g. "Cosy British Comedy"'),
+            })).min(3).max(5),
+          }),
+          prompt: `User wants: ${mediaType === 'movie' ? 'a movie' : 'a TV show'}
+${prefsParts}${feedbackParts ? `\n\nFeedback on previous picks:\n${feedbackParts}` : ''}
+
+Pick 3–5 titles by index that best match the preferences. Vary your choices.
+${numberedList}`,
+        })
+
+        // Step 2: validate indices against the pool (model might hallucinate out-of-range)
+        const pickedItems = selection.object.picks
+          .filter(p => p.index >= 0 && p.index < poolSlice.length)
+          .map(p => {
+            const r = poolSlice[p.index]
+            return {
+              title: r.title ?? r.name ?? 'Unknown',
+              year: (r.release_date ?? r.first_air_date ?? '').slice(0, 4),
+              overview: r.overview?.slice(0, 200) ?? '',
+              img: r.poster_path ? ` [img:${r.poster_path}]` : '',
+              vibe: p.vibe,
+            }
+          })
+
+        // Step 3: stream warm descriptions for exactly the validated picks
+        const pickedText = pickedItems
+          .map(p => `${p.title} (${p.year})${p.img} · ${p.vibe} — ${p.overview}`)
+          .join('\n')
+
         const result = streamText({
           model: openrouter('x-ai/grok-4.1-fast'),
-          temperature: 1.1,
-          system: `You are an expert film and TV recommender.
-Only recommend titles from the list provided — never invent titles.
-Format EXACTLY like this (include [img:...] if listed for that title):
+          temperature: 0.9,
+          system: `Write warm, personal film/TV recommendations.
+Format each one EXACTLY like this (include [img:...] if listed):
 **[Title]** ([Year]) · [Genre/Vibe] [img:[poster_path]]
 _Why you'll love it:_ [1–2 warm, specific sentences]
-Pick 3–5 titles. Be enthusiastic and personal. Vary your selections — avoid repeating the same picks you may have chosen before.`,
-          prompt: `Looking for: ${mediaType === 'movie' ? 'a movie' : 'a TV show'}
-${prefsParts}${feedbackParts ? `\n\nUser feedback on previous results:\n${feedbackParts}` : ''}
-
-Available titles (pick from anywhere in this list):
-${items}
-
-Recommend the best matches.`,
+Write about ONLY the titles given to you — do not add, substitute, or mention any other title.`,
+          prompt: `Write enthusiastic recommendations for exactly these titles:\n${pickedText}`,
           maxTokens: 900,
         })
 
@@ -329,6 +484,9 @@ Recommend the best matches.`,
     headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   })
 })
+
+// ── OG Image ───────────────────────────────────────────────────────────────
+app.get('/og-image', (c) => c.html(OG_IMAGE_HTML))
 
 // ── Static client files ────────────────────────────────────────────────────
 app.use('/*', serveStatic({ root: '../client/dist' }))
