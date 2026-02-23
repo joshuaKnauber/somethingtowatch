@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:base-ui.com)",
+      "mcp__ide__getDiagnostics"
+    ]
+  }
+}
