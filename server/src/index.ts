@@ -56,111 +56,6 @@ const TV_GENRE_IDS: Record<string, number> = {
   Romance: 10749, Horror: 27, Thriller: 53,
 }
 
-// ── OG Image HTML ──────────────────────────────────────────────────────────
-const OG_IMAGE_HTML = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400&family=Lora:ital,wght@1,400&display=swap" rel="stylesheet"/>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1200px;height:630px;overflow:hidden;background:#0D0B08;color:#F2ECD8;-webkit-font-smoothing:antialiased}
-.root{width:1200px;height:630px;display:flex;flex-direction:column;position:relative;overflow:hidden}
-.glow{position:absolute;pointer-events:none}
-.glow-a{top:-80px;left:20%;width:800px;height:500px;background:radial-gradient(ellipse,rgba(200,40,30,.1) 0%,transparent 60%)}
-.glow-b{bottom:-60px;right:60px;width:500px;height:350px;background:radial-gradient(ellipse,rgba(201,146,42,.07) 0%,transparent 60%)}
-.strip{height:18px;flex-shrink:0;background-color:#1A1612;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='18'%3E%3Crect x='3' y='3' width='8' height='12' rx='1' fill='%230D0B08'/%3E%3Crect x='15' y='3' width='8' height='12' rx='1' fill='%230D0B08'/%3E%3C/svg%3E");background-repeat:repeat-x;background-size:26px 18px}
-.marquee{height:8px;flex-shrink:0;background-color:#0D0B08;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='45' height='8'%3E%3Ccircle cx='2' cy='4' r='2' fill='%23F0DFA0' opacity='.95'/%3E%3Ccircle cx='11' cy='4' r='2' fill='%232E2418' opacity='.2'/%3E%3Ccircle cx='20' cy='4' r='2' fill='%23C9922A' opacity='.65'/%3E%3Ccircle cx='29' cy='4' r='2' fill='%232E2418' opacity='.2'/%3E%3Ccircle cx='38' cy='4' r='2' fill='%232E2418' opacity='.2'/%3E%3C/svg%3E");background-repeat:repeat-x;background-size:45px 8px}
-.band{height:4px;background:#C8281E;flex-shrink:0}
-.body{flex:1;display:flex;overflow:hidden}
-.perfs{width:28px;flex-shrink:0;background:#161210;display:flex;flex-direction:column;justify-content:space-evenly;align-items:center;padding:18px 0}
-.perf{width:11px;height:8px;border-radius:2px;background:#0D0B08;border:1px solid #252018}
-.main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 52px 0 56px;border-right:1px solid #2E2620}
-.label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.35em;color:#8A7050;margin-bottom:16px}
-.title{font-family:'Bebas Neue',sans-serif;font-size:118px;line-height:.88;color:#F2ECD8;letter-spacing:.03em;text-shadow:0 0 100px rgba(200,40,30,.2),0 4px 12px rgba(0,0,0,.8)}
-.divider{width:48px;height:3px;background:#C8281E;margin:22px 0}
-.tagline{font-family:'Lora',Georgia,serif;font-style:italic;font-size:17px;color:#A89070;line-height:1.5;margin-bottom:22px}
-.metas{display:flex;align-items:center;gap:10px}
-.meta{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.2em;color:#C9922A}
-.dot{font-family:'DM Mono',monospace;font-size:9px;color:#3A3020}
-.panel{width:280px;flex-shrink:0;display:flex;flex-direction:column;padding:28px 24px;gap:12px}
-.plabel{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.3em;color:#8A7050;text-align:center}
-.frame{flex:1;border:1px solid #2E2620;background:#120F0C;overflow:hidden;display:flex;flex-direction:column}
-.fs{height:10px;flex-shrink:0;background-color:#1A1612;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='10'%3E%3Crect x='3' y='2' width='8' height='6' rx='1' fill='%230D0B08'/%3E%3Crect x='15' y='2' width='8' height='6' rx='1' fill='%230D0B08'/%3E%3C/svg%3E");background-repeat:repeat-x;background-size:26px 10px}
-.fbody{flex:1;padding:16px;display:flex;flex-direction:column;gap:8px}
-.gl{font-family:'DM Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.3em;color:#6A5840;margin-bottom:3px}
-.pill{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.12em;padding:5px 10px;border:1px solid #2E2620;background:#1A1612;color:#9A8870}
-.pon{color:#F2A898;background:#C8281E15;border-color:#C8281E55}
-.pgold{color:#C9922A;border-color:#C9922A30;text-align:center}
-.purl{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.15em;color:#4A3828;text-align:center}
-</style>
-</head>
-<body>
-<div class="root">
-  <div class="glow glow-a"></div>
-  <div class="glow glow-b"></div>
-  <div class="strip"></div>
-  <div class="marquee"></div>
-  <div class="band"></div>
-  <div class="body">
-    <div class="perfs">
-      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
-      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
-      <div class="perf"></div>
-    </div>
-    <div class="main">
-      <div class="label">&#8212; Now Presenting &#8212;</div>
-      <div class="title">Something<br>to Watch</div>
-      <div class="divider"></div>
-      <div class="tagline">presented for your viewing pleasure</div>
-      <div class="metas">
-        <span class="meta">AI-Powered</span>
-        <span class="dot">&middot;</span>
-        <span class="meta">Movie &amp; TV</span>
-        <span class="dot">&middot;</span>
-        <span class="meta">Recommendations</span>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="plabel">&#8212; Tonight&#8217;s Selection &#8212;</div>
-      <div class="frame">
-        <div class="fs"></div>
-        <div class="fbody">
-          <div>
-            <div class="gl">Genre</div>
-            <div class="pill pon">Action &middot; Thriller</div>
-          </div>
-          <div>
-            <div class="gl">Mood</div>
-            <div class="pill pon">Dark &amp; Gritty</div>
-          </div>
-          <div>
-            <div class="gl">Style</div>
-            <div class="pill">Widescreen Epic</div>
-          </div>
-          <div style="margin-top:auto;padding-top:12px;border-top:1px solid #1E1A16">
-            <div class="pill pgold">AI Picks Best Matches &#10022;</div>
-          </div>
-        </div>
-        <div class="fs"></div>
-      </div>
-      <div class="purl">somethingto.watch</div>
-    </div>
-    <div class="perfs">
-      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
-      <div class="perf"></div><div class="perf"></div><div class="perf"></div>
-      <div class="perf"></div>
-    </div>
-  </div>
-  <div class="band"></div>
-  <div class="marquee"></div>
-  <div class="strip"></div>
-</div>
-</body>
-</html>`
-
 // ── TMDB helper ────────────────────────────────────────────────────────────
 async function tmdbFetch(path: string, params: Record<string, string> = {}) {
   const url = new URL(`https://api.themoviedb.org/3${path}`)
@@ -485,12 +380,11 @@ Write about ONLY the titles given to you — do not add, substitute, or mention 
   })
 })
 
-// ── OG Image ───────────────────────────────────────────────────────────────
-app.get('/og-image', (c) => c.html(OG_IMAGE_HTML))
-
-// ── Static client files ────────────────────────────────────────────────────
-app.use('/*', serveStatic({ root: '../client/dist' }))
-app.get('/*', serveStatic({ path: 'index.html', root: '../client/dist' }))
+// ── Static client files (production only) ──────────────────────────────────
+if (process.env.NODE_ENV === 'production') {
+  app.use('/*', serveStatic({ root: '../client/dist' }))
+  app.get('/*', serveStatic({ path: 'index.html', root: '../client/dist' }))
+}
 
 // ── Start ──────────────────────────────────────────────────────────────────
 const port = Number(process.env.PORT ?? 3000)
