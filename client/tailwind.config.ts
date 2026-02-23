@@ -6,7 +6,7 @@ export default {
     extend: {
       fontFamily: {
         display: ['"Bebas Neue"', 'Impact', 'sans-serif'],
-        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+        serif: ['"Lora"', 'Georgia', 'serif'],
         sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
         mono: ['"DM Mono"', 'monospace'],
       },

@@ -7,8 +7,9 @@ config({ path: join(dirname(fileURLToPath(import.meta.url)), '../../.env') })
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { streamText } from 'ai'
+import { streamText, generateObject } from 'ai'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+import { z } from 'zod'
 
 // ── Rate limiter (in-memory, per IP) ────────────────────────────────────────
 interface RateEntry { count: number; resetAt: number }
@@ -155,38 +156,101 @@ app.post('/api/recommend', async (c) => {
 
         // ── TMDB fetch ────────────────────────────────────────────────────
         type TmdbItem = {
+          id?: number
           title?: string; name?: string
           release_date?: string; first_air_date?: string
           overview?: string; vote_average?: number; poster_path?: string | null
         }
 
-        const discoverParams: Record<string, string> = {
-          sort_by: 'popularity.desc',
+        const baseParams: Record<string, string> = {
           'vote_count.gte': '40',
           'vote_average.gte': '5.5',
         }
         if (selectedGenreIds.length > 0) {
-          discoverParams.with_genres = selectedGenreIds.join(',')
+          baseParams.with_genres = selectedGenreIds.join(',')
         }
         if (providerIds.length > 0) {
-          discoverParams.with_watch_providers = providerIds.join('|')
-          discoverParams.watch_region = country
+          baseParams.with_watch_providers = providerIds.join('|')
+          baseParams.watch_region = country
         }
 
         const searchQ = [...genres, ...moods].slice(0, 2).join(' ')
-        const [discoverRes, searchRes] = await Promise.allSettled([
-          tmdbFetch(`/discover/${mediaType}`, discoverParams),
+
+        // Phase 1: general TMDB discover + description filter generation — all in parallel
+        const [filterResult, ...tmdbResults] = await Promise.allSettled([
+          // If description provided, use a fast model to extract targeted search terms
+          description.trim()
+            ? generateObject({
+                model: openrouter('openai/gpt-4o-mini'),
+                schema: z.object({
+                  searchQueries: z.array(z.string()).max(3)
+                    .describe('2-3 short TMDB search queries (2-4 words each) that capture the essence of the description'),
+                  similarTitles: z.array(z.string()).max(3)
+                    .describe('2-3 specific well-known titles that match what is described'),
+                }),
+                prompt: `A user wants a ${mediaType === 'movie' ? 'movie' : 'TV show'} matching this description: "${description}"
+
+Generate short TMDB search queries and similar well-known ${mediaType === 'movie' ? 'movie' : 'TV show'} titles.
+Search queries should be 2-4 words capturing themes, tone, or style.
+Similar titles should be real, recognisable ${mediaType === 'movie' ? 'films' : 'shows'}.`,
+              })
+            : Promise.resolve(null),
+          // General discover fetches
+          tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'popularity.desc', page: '1' }),
+          tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'popularity.desc', page: '2' }),
+          tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'popularity.desc', page: '3' }),
+          tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'vote_average.desc', 'vote_count.gte': '150', page: '1' }),
+          tmdbFetch(`/discover/${mediaType}`, { ...baseParams, sort_by: 'vote_average.desc', 'vote_count.gte': '150', page: '2' }),
           searchQ
             ? tmdbFetch(`/search/${mediaType}`, { query: searchQ, include_adult: 'false' })
             : Promise.resolve({ results: [] }),
         ])
 
-        const pool: TmdbItem[] = [
-          ...((searchRes.status === 'fulfilled' ? searchRes.value.results : []) as TmdbItem[]),
-          ...((discoverRes.status === 'fulfilled' ? discoverRes.value.results : []) as TmdbItem[]),
-        ]
+        // Phase 2: if filters were generated, run targeted TMDB searches
+        const descriptionPool: TmdbItem[] = []
+        if (filterResult?.status === 'fulfilled' && filterResult.value) {
+          const { searchQueries, similarTitles } = filterResult.value.object
+          console.log(`[recommend] description filters: queries=${JSON.stringify(searchQueries)} similar=${JSON.stringify(similarTitles)}`)
+          const descSearches = await Promise.allSettled([
+            ...searchQueries.map(q => tmdbFetch(`/search/${mediaType}`, { query: q, include_adult: 'false' })),
+            ...similarTitles.map(t => tmdbFetch(`/search/${mediaType}`, { query: t, include_adult: 'false' })),
+          ])
+          for (const res of descSearches) {
+            if (res.status === 'fulfilled') {
+              descriptionPool.push(...(res.value.results ?? []) as TmdbItem[])
+            }
+          }
+        }
 
-        const items = pool.slice(0, 20).map((r) => {
+        // Merge with deduplication — description-derived results go first (priority)
+        const seen = new Set<number>()
+        const pool: TmdbItem[] = []
+
+        for (const item of descriptionPool) {
+          if (item.id == null || seen.has(item.id)) continue
+          seen.add(item.id)
+          pool.push(item)
+        }
+        const descCount = pool.length
+
+        for (const res of tmdbResults) {
+          if (res.status !== 'fulfilled') continue
+          for (const item of (res.value.results ?? []) as TmdbItem[]) {
+            if (item.id == null || seen.has(item.id)) continue
+            seen.add(item.id)
+            pool.push(item)
+          }
+        }
+
+        // Shuffle only the general tail — description results stay at the front
+        const tail = pool.splice(descCount)
+        for (let i = tail.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1))
+          ;[tail[i], tail[j]] = [tail[j], tail[i]]
+        }
+        pool.push(...tail)
+
+        const items = pool.slice(0, 30).map((r) => {
           const title = r.title ?? r.name ?? 'Unknown'
           const year = (r.release_date ?? r.first_air_date ?? '').slice(0, 4)
           const rating = r.vote_average?.toFixed(1) ?? '?'
@@ -211,13 +275,14 @@ app.post('/api/recommend', async (c) => {
 
         const result = streamText({
           model: openrouter('x-ai/grok-4.1-fast'),
+          temperature: 1.1,
           system: `You are an expert film and TV recommender.
 Only recommend titles from the list provided — never invent titles.
 Format EXACTLY like this (include [img:...] if listed for that title):
 **[Title]** ([Year]) · [Genre/Vibe] [img:[poster_path]]
 _Why you'll love it:_ [1–2 warm, specific sentences]
-Pick 3–5 titles. Be enthusiastic and personal.`,
-          prompt: `Looking for: ${mediaType === 'movie' ? 'a movie' : 'a TV show'}\n${prefsParts}\n\nAvailable titles:\n${items}\n\nRecommend the best matches.`,
+Pick 3–5 titles. Be enthusiastic and personal. Vary your selections — avoid repeating the same picks you may have chosen before.`,
+          prompt: `Looking for: ${mediaType === 'movie' ? 'a movie' : 'a TV show'}\n${prefsParts}\n\nAvailable titles (pick from anywhere in this list):\n${items}\n\nRecommend the best matches.`,
           maxTokens: 900,
         })
 
